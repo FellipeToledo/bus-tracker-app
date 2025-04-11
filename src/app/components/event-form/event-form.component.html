@@ -1,0 +1,81 @@
+<div class="form-container">
+    <h2>Cadastrar Novo Evento</h2>
+    
+    <form (ngSubmit)="onSubmit()" #eventForm="ngForm">
+      <div class="form-group">
+        <label for="title">Título do Evento</label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          [(ngModel)]="event.title" 
+          required
+          class="form-input"
+          placeholder="Ex: Conferência de Tecnologia">
+      </div>
+
+      <div class="form-group">
+        <label for="date">Data</label>
+        <input 
+          type="datetime-local" 
+          id="date" 
+          name="date" 
+          [(ngModel)]="event.date" 
+          required
+          class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label for="location">Localização (Lat, Long)</label>
+        <div class="location-fields">
+          <input 
+            type="number" 
+            id="lat" 
+            name="lat" 
+            [(ngModel)]="event.lat" 
+            step="0.000001"
+            required
+            class="form-input"
+            placeholder="Latitude">
+          <input 
+            type="number" 
+            id="lng" 
+            name="lng" 
+            [(ngModel)]="event.lng" 
+            step="0.000001"
+            required
+            class="form-input"
+            placeholder="Longitude">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Descrição</label>
+        <textarea 
+          id="description" 
+          name="description" 
+          [(ngModel)]="event.description" 
+          rows="4"
+          class="form-input"
+          placeholder="Detalhes do evento..."></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="submit-btn"
+          [disabled]="!eventForm.valid">
+          Salvar Evento
+        </button>
+        <button 
+          type="button" 
+          class="cancel-btn"
+          (click)="navigateToMap()">
+          Ver Mapa
+        </button>
+        <button (click)="navigateBack()">
+          Voltar
+        </button>
+      </div>
+    </form>
+  </div>

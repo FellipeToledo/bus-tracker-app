@@ -1,1 +1,21 @@
-/* You can add global styles to this file, and also import other style files */
+// styles.scss
+@use '@angular/material' as mat;
+
+// Configuração mínima do tema
+@include mat.core();
+
+$primary: mat.m2-define-palette(mat.$m2-indigo-palette);
+$accent: mat.m2-define-palette(mat.$m2-pink-palette);
+$theme: mat.m2-define-light-theme((
+  color: (
+    primary: $primary,
+    accent: $accent
+  )
+));
+
+@include mat.all-component-themes($theme);
+
+body { 
+  margin: 0;
+  font-family: Roboto, sans-serif;
+}

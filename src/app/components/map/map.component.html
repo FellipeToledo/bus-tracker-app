@@ -1,0 +1,37 @@
+<mat-toolbar color="primary" class="map-toolbar">
+  <button mat-icon-button (click)="navigateBack()" aria-label="Voltar para página inicial">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  
+  <span class="toolbar-title">Mapa Interativo</span>
+
+  <span class="spacer"></span>
+
+  <!-- Botão de cadastro integrado na toolbar -->
+  <button mat-raised-button color="accent" (click)="navigateToForm()" aria-label="Cadastrar novo evento">
+    <mat-icon>add_location</mat-icon>
+    <span class="button-text">Novo Evento</span>
+  </button>
+
+  <button mat-icon-button (click)="refreshMap()" aria-label="Recarregar mapa" matTooltip="Centralizar mapa">
+    <mat-icon>refresh</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-card class="map-card">
+  <div id="map" class="map-container"></div>
+  
+  <!-- Controles de zoom permanecem no canto do mapa -->
+  <div class="zoom-controls">
+    <button mat-mini-fab color="accent" (click)="zoomIn()" aria-label="Aumentar zoom" matTooltip="Zoom in">
+      <mat-icon>add</mat-icon>
+    </button>
+    <button mat-mini-fab color="accent" (click)="zoomOut()" aria-label="Diminuir zoom" matTooltip="Zoom out">
+      <mat-icon>remove</mat-icon>
+    </button>
+  </div>
+
+  <mat-card-footer class="map-footer">
+    <small>Zoom: {{ currentZoom }} | Coordenadas: {{ currentCenter }}</small>
+  </mat-card-footer>
+</mat-card>
