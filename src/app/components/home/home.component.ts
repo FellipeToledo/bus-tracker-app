@@ -12,11 +12,15 @@ export class HomeComponent {
   constructor(private router: Router) {}
 
   navigateToForm() {
-    this.router.navigate(['/new-event']);
+    this.router.navigate(['/events/new']);
   }
 
   navigateToMap() {
     this.router.navigate(['/map']);
+  }
+
+  navigateToEvents() {
+    this.router.navigate(['/events']);
   }
 
 }

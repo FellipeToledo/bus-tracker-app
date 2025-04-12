@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, inject } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import * as L from 'leaflet';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 interface MapEvent {
+  id: string;
   title: string;
   date: string;
   lat: number;
@@ -30,23 +31,30 @@ interface MapEvent {
   styleUrl: './map.component.scss'
 })
 export class MapComponent implements AfterViewInit {
-  private router = inject(Router);
-  private snackBar = inject(MatSnackBar);
   private map!: L.Map;
-  
-  // Informações do mapa
+  private eventMarkers: L.Marker[] = [];
+
   currentZoom = 11;
   currentCenter = '-22.9687° S, -43.3895° W';
+ 
+  constructor(
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) {
+
+  }
 
   ngAfterViewInit(): void {
     this.initMap();
-    this.loadEvents();
+    this.loadAndDisplayEvents();
     this.setupMapEvents();
+    
   }
 
   private initMap(): void {
     this.map = L.map('map', {
-      zoomControl: false // Desativa o controle de zoom padrão
+      zoomControl: false, // Desativa o controle de zoom padrão
+      preferCanvas: true // Melhora performance com muitos marcadores
     }).setView([-22.9687, -43.3895], this.currentZoom);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -65,70 +73,76 @@ export class MapComponent implements AfterViewInit {
     });
   }
 
-  private loadEvents(): void {
+  private loadAndDisplayEvents(): void {
+    this.clearExistingMarkers();
+    
     try {
-      const storedEvents = localStorage.getItem('events');
-      const events: MapEvent[] = storedEvents ? JSON.parse(storedEvents) : [];
+      const events = this.getEventsFromStorage();
       
-      if (!events.length) {
-        this.snackBar.open('Nenhum evento cadastrado ainda', 'OK', { duration: 3000 });
+      if (events.length === 0) {
+        this.snackBar.open('Nenhum evento cadastrado. Clique no botão "+" para adicionar.', 'OK', { duration: 3000 });
+        return;
       }
 
-      events.forEach(event => {
-        if (this.isValidEvent(event)) {
-          this.addEventMarker(event);
-        }
-      });
+      events.forEach(event => this.addEventMarker(event));
+      
+      
     } catch (error) {
       console.error('Erro ao carregar eventos:', error);
-      this.snackBar.open('Erro ao carregar eventos salvos', 'OK', { duration: 5000 });
+      this.snackBar.open('Erro ao carregar eventos salvos', 'Fechar', { duration: 5000 });
     }
   }
 
-  private isValidEvent(event: any): event is MapEvent {
-    return (
-      event.title &&
-      event.date &&
-      typeof event.lat === 'number' && 
-      typeof event.lng === 'number'
-    );
+  private getEventsFromStorage(): MapEvent[] {
+    const storedEvents = localStorage.getItem('events');
+    return storedEvents ? JSON.parse(storedEvents) : [];
+  }
+
+  private clearExistingMarkers(): void {
+    this.eventMarkers.forEach(marker => marker.remove());
+    this.eventMarkers = [];
   }
 
   private addEventMarker(event: MapEvent): void {
     const marker = L.marker([event.lat, event.lng], {
       icon: L.icon({
-        iconUrl: 'assets/marker-icon.png',
+        iconUrl: 'img/marker-icon-blue.png',
         iconSize: [25, 41],
-        iconAnchor: [12, 41]
+        iconAnchor: [12, 41],
+        popupAnchor: [0, -32]
       })
     }).addTo(this.map);
 
     marker.bindPopup(this.createPopupContent(event));
+    this.eventMarkers.push(marker);
   }
 
   private createPopupContent(event: MapEvent): string {
     return `
       <div class="map-popup">
         <h3>${event.title}</h3>
-        ${event.description ? `<p>${event.description}</p>` : ''}
         <small><strong>Data:</strong> ${new Date(event.date).toLocaleString()}</small>
-        <div class="coordinates">
-          <small>Lat: ${event.lat.toFixed(6)}</small>
-          <small>Lng: ${event.lng.toFixed(6)}</small>
+        ${event.description ? `<p class="popup-description">${event.description}</p>` : ''}
+        <div class="popup-actions">
+          <button class="popup-btn" onclick="event.stopPropagation(); navigator.clipboard.writeText('${event.lat},${event.lng}')">
+            Copiar coordenadas
+          </button>
         </div>
       </div>
     `;
   }
 
+  
+
   // Controles do Mapa
   zoomIn(): void {
     this.map.zoomIn();
-    this.snackBar.open('Zoom aumentado', '', { duration: 1000 });
+    
   }
 
   zoomOut(): void {
     this.map.zoomOut();
-    this.snackBar.open('Zoom diminuído', '', { duration: 1000 });
+    
   }
 
   refreshMap(): void {
@@ -138,7 +152,7 @@ export class MapComponent implements AfterViewInit {
 
   // Navegação
   navigateToForm(): void {
-    this.router.navigate(['/new-event']);
+    this.router.navigate(['/events/new']);
   }
 
   navigateBack(): void {

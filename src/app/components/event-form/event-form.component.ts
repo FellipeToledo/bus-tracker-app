@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 interface Event {
+  id: string;
   title: string;
   date: string;
   lat: number | null;
   lng: number | null;
-  description: string;
+  description?: string;
 }
 
 @Component({
@@ -22,6 +23,7 @@ export class EventFormComponent {
   private router = inject(Router);
   
   event: Event = {
+    id: '',
     title: '',
     date: '',
     lat: null,

@@ -1,0 +1,55 @@
+@use '@angular/material' as mat;
+
+.event-list-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h2 {
+      margin: 0;
+      color: mat.m2-get-color-from-palette(mat.$m2-indigo-palette, 500);
+    }
+  }
+
+  .table-container {
+    border-radius: 8px;
+    overflow: hidden;
+    @include mat.elevation(2);
+
+    .mat-table {
+      width: 100%;
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .no-data {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      color: mat.m2-get-color-from-palette(mat.$m2-grey-palette, 500);
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 1.1em;
+      }
+    }
+  }
+}
