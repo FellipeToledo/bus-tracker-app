@@ -1,5 +1,8 @@
 <div class="form-container">
-    <h2>Cadastrar Novo Evento</h2>
+  <button mat-icon-button (click)="navigateBack()" aria-label="Voltar para página inicial">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <h2>{{ isEditMode ? 'Editar Evento' : 'Cadastrar Novo Evento' }}</h2>
     
     <form (ngSubmit)="onSubmit()" #eventForm="ngForm">
       <div class="form-group">
@@ -66,15 +69,6 @@
           class="submit-btn"
           [disabled]="!eventForm.valid">
           Salvar Evento
-        </button>
-        <button 
-          type="button" 
-          class="cancel-btn"
-          (click)="navigateToMap()">
-          Ver Mapa
-        </button>
-        <button (click)="navigateBack()">
-          Voltar
         </button>
       </div>
     </form>

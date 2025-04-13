@@ -1,15 +1,17 @@
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+
 import { Router } from '@angular/router';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
-import { Component, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
-interface MapEvent {
+export interface Event {
   id: string;
   title: string;
   date: string;
@@ -17,6 +19,8 @@ interface MapEvent {
   lng: number;
   description?: string;
 }
+
+const EVENT_DATA: Event[] = []
 
 @Component({
   selector: 'app-event-list',
@@ -26,76 +30,65 @@ interface MapEvent {
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
-    MatDialogModule
+    MatDialogModule,
+    MatPaginatorModule,
   ],
   templateUrl: './event-list.component.html',
   styleUrl: './event-list.component.scss'
 })
-export class EventListComponent implements OnInit{
+export class EventListComponent implements AfterViewInit{
+  displayedColumns: string[] = ['id', 'title', 'date', 'location', 'description', 'actions'];
+  dataSource = new MatTableDataSource<Event>(EVENT_DATA);
 
-  displayedColumns: string[] = ['title', 'date', 'location', 'actions'];
-  dataSource: MapEvent[] = [];
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+
+  ngAfterViewInit() {
+    this.loadEvents();
+    this.dataSource.paginator = this.paginator;
+  }
 
   constructor(
     private router: Router,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {}
 
-  ngOnInit(): void {
-    this.loadEvents();
-  }
+  ) {}
 
   loadEvents(): void {
     const storedEvents = localStorage.getItem('events');
-    this.dataSource = storedEvents ? JSON.parse(storedEvents) : [];
+    const events = storedEvents ? JSON.parse(storedEvents) : [];
+    this.dataSource = new MatTableDataSource<Event>(events);
   }
 
-  editEvent(event: MapEvent): void {
-    this.router.navigate(['/events/edit', event.id]);
+  editEvent(eventId: string): void {
+    this.router.navigate(['/events/edit', eventId]);
   }
 
-  deleteEvent(event: MapEvent): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: 'Confirmar Exclusão',
-        message: `Deseja realmente excluir o evento "${event.title}"?`
-      }
-    });
+  deleteEvent(eventId: string): void {
+    const storedEvents = localStorage.getItem('events');
+    let events = storedEvents ? JSON.parse(storedEvents) : [];
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.performDelete(event.id);
-      }
-    });
-  }
+    // Filtra o evento a ser removido
+    events = events.filter((event: Event) => event.id !== eventId);
 
-  private performDelete(eventId: string): void {
-   // 1. Filtra os eventos, removendo apenas o evento com o ID correspondente
-  const updatedEvents = this.dataSource.filter(e => e.id !== eventId);
-  
-  // 2. Atualiza o localStorage
-  localStorage.setItem('events', JSON.stringify(updatedEvents));
-  
-  // 3. Atualiza o dataSource para refletir a mudança na tabela
-  this.dataSource = [...updatedEvents]; // Usando spread para garantir imutabilidade
+    // Atualiza o localStorage
+    localStorage.setItem('events', JSON.stringify(events));
 
-  this.snackBar.open('Evento excluído com sucesso!', 'Fechar', {
-    duration: 3000
-  });
-  }
+    // Atualiza o dataSource
+    this.dataSource.data = events;
 
-  viewOnMap(lat: number, lng: number): void {
-    this.router.navigate(['/map'], {
-      queryParams: { lat, lng, zoom: 15 }
+    // Exibe uma mensagem de sucesso
+    this.snackBar.open('Evento excluído com sucesso!', 'Fechar', {
+      duration: 3000,
     });
   }
+
 
   navigateToForm(): void {
     this.router.navigate(['/events/new']);
   }
 
-    navigateBack(): void {
+  navigateBack(): void {
     this.router.navigate(['/']);
   }
 

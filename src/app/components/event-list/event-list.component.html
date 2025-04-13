@@ -1,5 +1,8 @@
 <div class="event-list-container">
     <div class="header">
+      <button mat-icon-button (click)="navigateBack()" aria-label="Voltar para página inicial">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
       
       <h2>Eventos Cadastrados</h2>
       <button mat-raised-button color="primary" (click)="navigateToForm()">
@@ -10,6 +13,13 @@
   
     <div class="table-container">
       <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+        
+          <!-- ID -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef> ID </th>
+          <td mat-cell *matCellDef="let event"> {{event.id | slice:0:8}}... </td>
+        </ng-container>
+
         <!-- Título -->
         <ng-container matColumnDef="title">
           <th mat-header-cell *matHeaderCellDef> Título </th>
@@ -29,6 +39,12 @@
             {{event.lat | number:'1.4-4'}}, {{event.lng | number:'1.4-4'}}
           </td>
         </ng-container>
+
+         <!-- Descrição -->
+         <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef> Descrição </th>
+          <td mat-cell *matCellDef="let event"> {{event.description}} </td>
+        </ng-container>
   
         <!-- Ações -->
         <ng-container matColumnDef="actions">
@@ -36,19 +52,21 @@
           <td mat-cell *matCellDef="let event" class="actions-cell">
             <button mat-icon-button color="primary" 
                     matTooltip="Visualizar no mapa"
-                    (click)="viewOnMap(event.lat, event.lng)">
+                    >
               <mat-icon>map</mat-icon>
             </button>
             
             <button mat-icon-button color="accent" 
                     matTooltip="Editar"
-                    (click)="editEvent(event)">
+                    (click)="editEvent(event.id)"
+                    >
               <mat-icon>edit</mat-icon>
             </button>
             
             <button mat-icon-button color="warn" 
                     matTooltip="Excluir"
-                    (click)="deleteEvent(event)">
+                    (click)="deleteEvent(event.id)"
+                    >
               <mat-icon>delete</mat-icon>
             </button>
           </td>
@@ -57,10 +75,10 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
-  
-      <div class="no-data" *ngIf="dataSource.length === 0">
-        <mat-icon>info</mat-icon>
-        <p>Nenhum evento cadastrado ainda</p>
-      </div>
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+      showFirstLastButtons
+      aria-label="Select page of events">
+      </mat-paginator>
+    
     </div>
   </div>

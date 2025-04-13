@@ -1,7 +1,13 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatIcon } from '@angular/material/icon';
 
 interface Event {
   id: string;
@@ -14,13 +20,19 @@ interface Event {
 
 @Component({
   selector: 'app-event-form',
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatButtonModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatIcon
+  ],
   templateUrl: './event-form.component.html',
   styleUrl: './event-form.component.scss'
 })
-export class EventFormComponent {
-
-  private router = inject(Router);
+export class EventFormComponent implements OnInit {
   
   event: Event = {
     id: '',
@@ -30,21 +42,59 @@ export class EventFormComponent {
     lng: null,
     description: ''
   };
+  isEditMode = false;
+
+  constructor(
+    private router: Router,
+    private snackBar: MatSnackBar,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit() {
+    const eventId = this.route.snapshot.paramMap.get('id');
+    if (eventId) {
+      this.isEditMode = true;
+      this.loadEvent(eventId);
+    } else {
+      this.event.id = this.generateId();
+    }
+  }
+
+  loadEvent(eventId: string): void {
+    const events = JSON.parse(localStorage.getItem('events') || '[]');
+    const eventToEdit = events.find((e: Event) => e.id === eventId);
+    if (eventToEdit) {
+      this.event = { ...eventToEdit };
+    }
+  }
+
+  private generateId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+  }
 
   onSubmit() {
-    const storedEvents = localStorage.getItem('events');
-    const events: Event[] = storedEvents ? JSON.parse(storedEvents) : [];
-    
-    events.push({ ...this.event });
+    const events = JSON.parse(localStorage.getItem('events') || '[]');
+    if (this.isEditMode) {
+      // Atualiza o evento existente
+      const index = events.findIndex((e: Event) => e.id === this.event.id);
+      if (index !== -1) {
+        events[index] = { ...this.event };
+      }
+    } else {
+      // Adiciona novo evento
+      events.push({ ...this.event });
+    }
+
     localStorage.setItem('events', JSON.stringify(events));
     
-    alert('Evento salvo com sucesso!');
-    this.navigateToMap();
+    const message = this.isEditMode 
+      ? 'Evento atualizado com sucesso!' 
+      : 'Evento salvo com sucesso!';
+    
+    this.snackBar.open(message, 'Fechar', { duration: 3000 });
+    this.router.navigate(['/events']);
   }
-
-  navigateToMap() {
-    this.router.navigate(['/map']);
-  }
+  
   navigateBack() {
     this.router.navigate(['/']);
   }
