@@ -2,7 +2,7 @@
 
 .event-list-container {
   padding: 24px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 
   .header {
@@ -18,13 +18,75 @@
   }
 }
 
-.mat-icon{
-  font-size:24px !important; 
-  width:24px;              
-  height:24px;              
+.table-container {
+  overflow-x: auto;
+}
 
+.mat-icon {
+  font-size: 24px !important;
+  width: 24px;
+  height: 24px;
 }
 
 table {
   width: 100%;
+}
+
+.roadblock-info {
+  padding: 4px 0;
+  
+  div {
+    margin: 2px 0;
+  }
+}
+
+/* Estilos para badges de status e severidade */
+.status-badge, .severity-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge {
+  &.planejamento {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+  &.andamento {
+    background-color: #fff8e1;
+    color: #ff8f00;
+  }
+  &.concluído {
+    background-color: #e8f5e9;
+    color: #388e3c;
+  }
+}
+
+.severity-badge {
+  &.leve {
+    background-color: #e8f5e9;
+    color: #388e3c;
+  }
+  &.moderada {
+    background-color: #fff8e1;
+    color: #ff8f00;
+  }
+  &.grave {
+    background-color: #ffebee;
+    color: #d32f2f;
+  }
+}
+
+/* Ajustes para responsividade */
+@media (max-width: 768px) {
+  .event-list-container {
+    padding: 12px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start !important;
+  }
 }

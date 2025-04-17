@@ -6,18 +6,26 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-
 import { Router } from '@angular/router';
-import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+
+import { EventService } from '../../services/event.service';
 
 export interface Event {
   id: string;
-  title: string;
-  date: string;
-  lat: number;
-  lng: number;
-  description?: string;
+  description: string;
+  neighborhood: string;
+  severity: string;
+  status: string;
+  roadblocks: Roadblock[];
+}
+
+export interface Roadblock {
+  road: string;
+  startRoad: string;
+  endRoad: string;
+  startDateTime: string;
+  endDateTime: string;
 }
 
 const EVENT_DATA: Event[] = []
@@ -37,8 +45,8 @@ const EVENT_DATA: Event[] = []
   styleUrl: './event-list.component.scss'
 })
 export class EventListComponent implements AfterViewInit{
-  displayedColumns: string[] = ['id', 'title', 'date', 'location', 'description', 'actions'];
-  dataSource = new MatTableDataSource<Event>(EVENT_DATA);
+  displayedColumns: string[] = ['id', 'description', 'severity', 'status', 'actions'];
+  dataSource = new MatTableDataSource<Event>();
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -49,41 +57,35 @@ export class EventListComponent implements AfterViewInit{
 
   constructor(
     private router: Router,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private eventService: EventService,
 
   ) {}
 
   loadEvents(): void {
-    const storedEvents = localStorage.getItem('events');
-    const events = storedEvents ? JSON.parse(storedEvents) : [];
-    this.dataSource = new MatTableDataSource<Event>(events);
+    this.eventService.getAllEvents().subscribe({
+      next: (events) => {
+        this.dataSource.data = events;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar eventos:', err);
+        this.snackBar.open('Erro ao carregar eventos', 'Fechar', { duration: 3000 });
+      }
+    });
   }
+
+  viewOnMap(event: Event): void {
+    // TO DO 
+    // Implementar navegação para o mapa com coordenadas
+    console.log('Visualizar no mapa:', event);
+  }
+
 
   editEvent(eventId: string): void {
     this.router.navigate(['/events/edit', eventId]);
   }
 
-  deleteEvent(eventId: string): void {
-    const storedEvents = localStorage.getItem('events');
-    let events = storedEvents ? JSON.parse(storedEvents) : [];
-
-    // Filtra o evento a ser removido
-    events = events.filter((event: Event) => event.id !== eventId);
-
-    // Atualiza o localStorage
-    localStorage.setItem('events', JSON.stringify(events));
-
-    // Atualiza o dataSource
-    this.dataSource.data = events;
-
-    // Exibe uma mensagem de sucesso
-    this.snackBar.open('Evento excluído com sucesso!', 'Fechar', {
-      duration: 3000,
-    });
-  }
-
-
+  
   navigateToForm(): void {
     this.router.navigate(['/events/new']);
   }
